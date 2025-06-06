@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMULADOR GERENCIAL DRE / BALANÇO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 5px;
+            background-color: #f4f7f6;
+            color: #333;
+            font-size: 11px;
+        }
+        .container {
+            max-width: 1450px;
+            margin: auto;
+            background-color: #fff;
+            padding: 8px;
+            border-radius: 5px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        /* Novo estilo para o cabeçalho com logo e título */
+        .header-with-logo {
+            display: flex;
+            align-items: center; /* Alinha verticalmente logo e título */
+            justify-content: center; /* Centraliza o conjunto logo+título */
+            margin-bottom: 10px;
+            padding-bottom: 2px; /* Adiciona padding para a linha de baixo do título */
+            border-bottom: 2px solid #3498db; /* A linha do título agora se estende por todo o conjunto */
+        }
+
+        .header-with-logo img {
+            height: 40px; /* Ajuste o tamanho do logo aqui */
+            margin-right: 15px; /* Espaçamento entre o logo e o título */
+        }
+
+        .header-with-logo h1 {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 0; /* Remove margem padrão do h1 para não interferir no flexbox */
+            padding: 0; /* Remove padding padrão do h1 */
+            border-bottom: none; /* A borda inferior agora está na div pai .header-with-logo */
+            color: #2c3e50;
+        }
+
+        #dre-wrapper h3, #bp-wrapper h3, #indicadores-wrapper h3 {
+            font-size: 1.0em;
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 2px;
+            color: #2c3e50;
+        }
+
+        .year-inputs-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 5px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        .year-inputs-container label {
+            font-weight: 500;
+        }
+        .year-inputs-container input[type="number"] {
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 55px;
+            text-align: center;
+            font-size: 0.95em;
+        }
+
+        .main-reports-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        #dre-wrapper, #bp-wrapper {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background-color: #fdfdfd;
+        }
+        #indicadores-wrapper {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background-color: #fdfdfd;
+            margin-top: 12px;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+        th, td {
+            border: 1px solid #ececec;
+            padding: 1px 3px;
+            vertical-align: middle;
+            font-size: 1em;
+        }
+
+        .financial-table th {
+            background-color: #f0f2f5;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .financial-table th:nth-child(1) { text-align: left; }
+        .financial-table th:nth-child(2),
+        .financial-table th:nth-child(4)
+        {
+            text-align: center;
+        }
+        #bp-ativo-table th:nth-child(2), #bp-ativo-table th:nth-child(3),
+        #bp-passivopl-table th:nth-child(2), #bp-passivopl-table th:nth-child(3) {
+            text-align: center;
+        }
+
+        .financial-table th:nth-child(3),
+        .financial-table th:nth-child(5),
+        .financial-table th:nth-child(6)
+        {
+            text-align: right;
+        }
+        #bp-ativo-table th:nth-child(4), #bp-passivopl-table th:nth-child(4) {
+            text-align: right;
+        }
+
+
+        .financial-table td {
+             text-align: left;
+        }
+        .financial-table td:nth-child(1) { }
+
+        #dre-table td:nth-child(2),
+        #dre-table td:nth-child(4)
+        {
+            text-align: right;
+        }
+        #dre-table td:nth-child(2) input[type="text"].data-input,
+        #dre-table td:nth-child(4) input[type="text"].data-input {
+            text-align: right;
+            width: 100%;
+        }
+        #dre-table td:nth-child(2).output,
+        #dre-table td:nth-child(4).output {
+            text-align: right;
+        }
+        #dre-table td:nth-child(3),
+        #dre-table td:nth-child(5),
+        #dre-table td:nth-child(6)
+        {
+            text-align: right;
+        }
+
+        #bp-ativo-table td:nth-child(2), #bp-passivopl-table td:nth-child(2),
+        #bp-ativo-table td:nth-child(3), #bp-passivopl-table td:nth-child(3)
+        {
+            text-align: right;
+        }
+        #bp-ativo-table td:nth-child(2) input[type="text"].data-input,
+        #bp-ativo-table td:nth-child(3) input[type="text"].data-input,
+        #bp-passivopl-table td:nth-child(2) input[type="text"].data-input,
+        #bp-passivopl-table td:nth-child(3) input[type="text"].data-input {
+            text-align: right;
+            width: 100%;
+            height: 20px;
+            padding: 2px 3px;
+        }
+        #bp-ativo-table td:nth-child(2).output,
+        #bp-ativo-table td:nth-child(3).output,
+        #bp-passivopl-table td:nth-child(2).output,
+        #bp-passivopl-table td:nth-child(3).output {
+            text-align: right;
+        }
+        #bp-ativo-table td:nth-child(4), #bp-passivopl-table td:nth-child(4)
+        {
+            text-align: right;
+        }
+
+        td.label {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .financial-table tr.account-group > td {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .financial-table tr.total > td {
+            font-weight: bold;
+            background-color: #e8e8e8;
+        }
+
+        .financial-table tr.linha-calculada-dre > td {
+            background-color: #e6f3ff;
+            font-weight: bold;
+        }
+
+        .financial-table tr.linha-total-bp > td {
+            background-color: #e6f3ff;
+            font-weight: bold;
+        }
+
+        td input[type="text"].data-input {
+            padding: 1px 2px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            box-sizing: border-box;
+            font-size: 1em;
+            height: 18px;
+        }
+        td input[type="text"].data-input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(52, 152, 219, 0.25);
+        }
+
+        .output { font-weight: bold; color: #27ae60; }
+        .output.negative { color: #c0392b; }
+        .analysis { color: #2980b9; }
+        .analysis.negative { color: #e74c3c; }
+        .analysis-text {
+            font-style: italic;
+            color: #555; /* Cor padrão para neutro */
+            font-size:0.9em;
+            text-align:left;
+            white-space: normal;
+        }
+        /* Novas classes para a análise de resultado */
+        .analysis-text.positive {
+            color: #27ae60; /* Verde para favorável */
+        }
+        .analysis-text.negative {
+            color: #c0392b; /* Vermelho para desfavorável */
+        }
+
+
+        .small-text { font-size: 0.9em; color: #7f8c8d; text-align: center; margin-bottom: 10px;}
+
+        #bp-layout-container {
+            display: flex;
+            gap: 8px;
+        }
+        #bp-ativo-section, #bp-passivopl-section {
+            flex: 1;
+        }
+        #bp-ativo-section h4, #bp-passivopl-section h4 {
+            font-size: 0.9em;
+            color: #3498db;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 2px;
+        }
+
+        /* Larguras das colunas DRE */
+        #dre-table td:nth-child(1) { width: 36%; }
+        #dre-table td:nth-child(2),
+        #dre-table td:nth-child(4)
+        { width: 18%; }
+        #dre-table td:nth-child(3),
+        #dre-table td:nth-child(5)
+        { width: 9%; }
+        #dre-table td:nth-child(6)
+        { width: 10%; }
+
+        /* Larguras das colunas BP (4 colunas) */
+        #bp-ativo-table td:nth-child(1), #bp-passivopl-table td:nth-child(1) { width: 40%; }
+        #bp-ativo-table td:nth-child(2), #bp-passivopl-table td:nth-child(2),
+        #bp-ativo-table td:nth-child(3), #bp-passivopl-table td:nth-child(3)
+        { width: 25%; }
+        #bp-ativo-table td:nth-child(4), #bp-passivopl-table td:nth-child(4)
+        { width: 10%; }
+
+
+        /* Tabela de Indicadores */
+        #indicadores-table th,
+        #indicadores-table td {
+            padding: 2px 4px; /* Um pouco mais de padding para indicadores */
+            font-size: 0.9em;
+        }
+        #indicadores-table .indicator-category-header td {
+            background-color: #7f8c8d; /* Cinza escuro para categoria */
+            color: white;
+            font-weight: bold;
+            text-align: left;
+            padding: 3px 5px;
+        }
+        #indicadores-table td:nth-child(1) { text-align: left; width: 25%; } /* Indicador */
+        #indicadores-table td:nth-child(2), /* Ano Atual */
+        #indicadores-table td:nth-child(3)  /* Ano Anterior */
+        {
+            text-align: center;
+            width: 12%;
+        }
+        #indicadores-table td:nth-child(4) { /* Formula */
+            text-align: left;
+            width: 20%;
+            font-size: 0.85em; /* Fonte menor para fórmula */
+            white-space: normal;
+        }
+        #indicadores-table td:nth-child(5) { /* Análise do Resultado */
+            text-align: left;
+            width: 31%;
+            white-space: normal; /* Permite quebra de linha */
+        }
+        /* Cabeçalhos da tabela de indicadores */
+        #indicadores-table th:nth-child(1) {text-align: left;}
+        #indicadores-table th:nth-child(2),
+        #indicadores-table th:nth-child(3) {text-align: center;}
+        #indicadores-table th:nth-child(4) {text-align: left;}
+        #indicadores-table th:nth-child(5) {text-align: left;}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-with-logo">
+            <img src="LOGO ALPINA.png" alt="Logo da Empresa">
+            <h1>SIMULADOR GERENCIAL DRE / BALANÇO</h1>
+        </div>
+
+        <div class="year-inputs-container">
+            <label for="input_ano_atual_label">Ano Atual:</label>
+            <input type="number" id="input_ano_atual_label" value="2024" min="1900" max="2100">
+            <label for="input_ano_anterior_label">Ano Anterior:</label>
+            <input type="number" id="input_ano_anterior_label" value="2023" min="1900" max="2100">
+        </div>
+
+        <p class="small-text">Insira os valores diretamente nas colunas de valor (R$) das tabelas DRE e Balanço. Os cálculos são atualizados automaticamente.</p>
+
+        <div class="main-reports-container">
+            <div id="dre-wrapper">
+                <h3>Demonstração do Resultado do Exercício (DRE)</h3>
+                <table class="financial-table" id="dre-table">
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th><span id="th_dre_ano_atual"></span> (R$)</th>
+                            <th>AV (%)</th>
+                            <th><span id="th_dre_ano_anterior"></span> (R$)</th>
+                            <th>AV (%)</th>
+                            <th>AH (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dre_tbody"></tbody>
+                </table>
+            </div>
+
+            <div id="bp-wrapper">
+                <h3>Balanço Patrimonial (BP)</h3>
+                <div id="bp-layout-container">
+                    <div id="bp-ativo-section">
+                        <h4>ATIVO</h4>
+                        <table class="financial-table" id="bp-ativo-table">
+                             <thead>
+                                 <tr>
+                                     <th>Conta</th>
+                                     <th><span id="th_bp_ativo_ano_atual"></span> (R$)</th>
+                                     <th><span id="th_bp_ativo_ano_anterior"></span> (R$)</th>
+                                     <th>AH (%)</th>
+                                 </tr>
+                             </thead>
+                             <tbody id="bp_ativo_tbody"></tbody>
+                        </table>
+                    </div>
+                    <div id="bp-passivopl-section">
+                        <h4>PASSIVO E PATRIMÔNIO LÍQUIDO</h4>
+                        <table class="financial-table" id="bp-passivopl-table">
+                            <thead>
+                                <tr>
+                                    <th>Conta</th>
+                                    <th><span id="th_bp_passivopl_ano_atual"></span> (R$)</th>
+                                    <th><span id="th_bp_passivopl_ano_anterior"></span> (R$)</th>
+                                    <th>AH (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bp_passivopl_tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="indicadores-wrapper">
+            <h3>Indicadores Financeiros e Econômicos</h3>
+            <table id="indicadores-table">
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th><span id="th_ind_ano_atual"></span></th>
+                        <th><span id="th_ind_ano_anterior"></span></th>
+                        <th>Fórmula</th>
+                        <th>Análise do Resultado</th>
+                    </tr>
+                </thead>
+                <tbody id="indicadores_tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- Helper Functions ---
+        function parseCurrency(valueStr) {
+            if (!valueStr || typeof valueStr !== 'string') return 0;
+            const cleanedValue = valueStr.replace("R$", "").replace(/\./g, '').replace(/,/g, '.').trim();
+            const number = parseFloat(cleanedValue);
+            return isNaN(number) ? 0 : number;
+        }
+
+        function formatCurrency(value, decimals = 2) {
+            if (isNaN(value) || value === null) return decimals === 0 ? "0" : "0,00";
+            return value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        }
+
+        function formatPercentage(value) {
+            if (isNaN(value) || !isFinite(value) || value === null) return "-";
+            return value.toFixed(2).replace('.', ',') + '%';
+        }
+
+        function getVal(id) {
+            const element = document.getElementById(id);
+            return element ? parseCurrency(element.value) : 0;
+        }
+
+        function setHtml(tdId, value, isCurrency = true, isNegativeRed = true, decimals = 2) {
+            const element = document.getElementById(tdId);
+            if(element) {
+                let displayValue = "-";
+                if (value === "-" ) {
+                    displayValue = "-";
+                } else if (typeof value === 'number' && isNaN(value)) {
+                    displayValue = "-";
+                } else if (isCurrency) {
+                    displayValue = formatCurrency(value, decimals);
+                } else {
+                    displayValue = value; // Para texto ou números não formatados como moeda
+                }
+
+                element.innerHTML = displayValue;
+                element.classList.remove('negative');
+                if (isNegativeRed && typeof value === 'number' && value < 0) {
+                    element.classList.add('negative');
+                }
+            }
+        }
+
+        function setAnalysisText(tdId, analysisObject) { // Agora recebe um objeto
+            const element = document.getElementById(tdId);
+            if (element) {
+                element.innerHTML = analysisObject.text;
+                element.classList.remove('positive', 'negative', 'neutral'); // Limpa classes anteriores
+
+                if (analysisObject.sentiment === "positive") {
+                    element.classList.add('positive');
+                } else if (analysisObject.sentiment === "negative") {
+                    element.classList.add('negative');
+                } else {
+                    element.classList.add('neutral'); // ou remove tudo para usar a cor padrão do .analysis-text
+                }
+            }
+        }
+
+
+        function setHtmlPercent(tdId, value) {
+            const element = document.getElementById(tdId);
+            if(element) {
+                element.innerHTML = formatPercentage(value);
+                element.classList.remove('negative');
+                if (typeof value === 'number' && value < 0 && isFinite(value)) {
+                    element.classList.add('negative');
+                }
+            }
+        }
+
+        function updateTableHeaders() {
+            const anoAtualInput = document.getElementById('input_ano_atual_label').value;
+            const anoAnteriorInput = document.getElementById('input_ano_anterior_label').value;
+
+            const anoAtual = anoAtualInput || "Atual";
+            const anoAnterior = anoAnteriorInput || "Anterior";
+
+            document.getElementById('th_dre_ano_atual').textContent = anoAtual;
+            document.getElementById('th_dre_ano_anterior').textContent = anoAnterior;
+            document.getElementById('th_bp_ativo_ano_atual').textContent = anoAtual;
+            document.getElementById('th_bp_ativo_ano_anterior').textContent = anoAnterior;
+            document.getElementById('th_bp_passivopl_ano_atual').textContent = anoAtual;
+            document.getElementById('th_bp_passivopl_ano_anterior').textContent = anoAnterior;
+            document.getElementById('th_ind_ano_atual').textContent = anoAtual;
+            document.getElementById('th_ind_ano_anterior').textContent = anoAnterior;
+
+            calcularTudo();
+        }
+
+        function construirTabelasComInputs() {
+            const dreTableBody = document.getElementById("dre_tbody");
+            dreTableBody.innerHTML = `
+                <tr><td class="label">(+) Receitas de Serviços</td><td><input type="text" id="input_dre_rs_atual" class="data-input" placeholder="0,00"></td><td id="d_rs_at_av" class="analysis">-</td><td><input type="text" id="input_dre_rs_anterior" class="data-input" placeholder="0,00"></td><td id="d_rs_an_av" class="analysis">-</td><td id="d_rs_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(+) Receitas de Vendas</td><td><input type="text" id="input_dre_rv_atual" class="data-input" placeholder="0,00"></td><td id="d_rv_at_av" class="analysis">-</td><td><input type="text" id="input_dre_rv_anterior" class="data-input" placeholder="0,00"></td><td id="d_rv_an_av" class="analysis">-</td><td id="d_rv_ah" class="analysis">-</td></tr>
+                <tr class="account-group linha-calculada-dre"><td class="label">(=) Receita Operacional Bruta</td><td id="d_rob_at" class="output">0,00</td><td id="d_rob_at_av" class="analysis">-</td><td id="d_rob_an" class="output">0,00</td><td id="d_rob_an_av" class="analysis">-</td><td id="d_rob_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Deduções da Receita Bruta</td><td><input type="text" id="input_dre_drb_atual" class="data-input" placeholder="0,00"></td><td id="d_drb_at_av" class="analysis">-</td><td><input type="text" id="input_dre_drb_anterior" class="data-input" placeholder="0,00"></td><td id="d_drb_an_av" class="analysis">-</td><td id="d_drb_ah" class="analysis">-</td></tr>
+                <tr class="account-group linha-calculada-dre"><td class="label">(=) Receita Operacional Líquida</td><td id="d_rol_at" class="output">0,00</td><td id="d_rol_at_av" class="analysis">-</td><td id="d_rol_an" class="output">0,00</td><td id="d_rol_an_av" class="analysis">-</td><td id="d_rol_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Custos (CPV/CSV)</td><td><input type="text" id="input_dre_c_atual" class="data-input" placeholder="0,00"></td><td id="d_c_at_av" class="analysis">-</td><td><input type="text" id="input_dre_c_anterior" class="data-input" placeholder="0,00"></td><td id="d_c_an_av" class="analysis">-</td><td id="d_c_ah" class="analysis">-</td></tr>
+                <tr class="account-group linha-calculada-dre"><td class="label">(=) Lucro Bruto</td><td id="d_lb_at" class="output">0,00</td><td id="d_lb_at_av" class="analysis">-</td><td id="d_lb_an" class="output">0,00</td><td id="d_lb_an_av" class="analysis">-</td><td id="d_lb_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Desp. Salário</td><td><input type="text" id="input_dre_dsal_atual" class="data-input" placeholder="0,00"></td><td id="d_dsal_at_av" class="analysis">-</td><td><input type="text" id="input_dre_dsal_anterior" class="data-input" placeholder="0,00"></td><td id="d_dsal_an_av" class="analysis">-</td><td id="d_dsal_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Desp. Admin.</td><td><input type="text" id="input_dre_dadm_atual" class="data-input" placeholder="0,00"></td><td id="d_dadm_at_av" class="analysis">-</td><td><input type="text" id="input_dre_dadm_anterior" class="data-input" placeholder="0,00"></td><td id="d_dadm_an_av" class="analysis">-</td><td id="d_dadm_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Desp. Operac.</td><td><input type="text" id="input_dre_dop_atual" class="data-input" placeholder="0,00"></td><td id="d_dop_at_av" class="analysis">-</td><td><input type="text" id="input_dre_dop_anterior" class="data-input" placeholder="0,00"></td><td id="d_dop_an_av" class="analysis">-</td><td id="d_dop_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Outras Desp. Op.</td><td><input type="text" id="input_dre_odop_atual" class="data-input" placeholder="0,00"></td><td id="d_odop_at_av" class="analysis">-</td><td><input type="text" id="input_dre_odop_anterior" class="data-input" placeholder="0,00"></td><td id="d_odop_an_av" class="analysis">-</td><td id="d_odop_ah" class="analysis">-</td></tr>
+                <tr class="account-group linha-calculada-dre"><td class="label">(=) Res. Operac. (Antes Finan.)</td><td id="d_resop_at" class="output">0,00</td><td id="d_resop_at_av" class="analysis">-</td><td id="d_resop_an" class="output">0,00</td><td id="d_resop_an_av" class="analysis">-</td><td id="d_resop_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(+) Rec. Financeiras</td><td><input type="text" id="input_dre_rf_atual" class="data-input" placeholder="0,00"></td><td id="d_rf_at_av" class="analysis">-</td><td><input type="text" id="input_dre_rf_anterior" class="data-input" placeholder="0,00"></td><td id="d_rf_an_av" class="analysis">-</td><td id="d_rf_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Desp. Financeiras</td><td><input type="text" id="input_dre_df_atual" class="data-input" placeholder="0,00"></td><td id="d_df_at_av" class="analysis">-</td><td><input type="text" id="input_dre_df_anterior" class="data-input" placeholder="0,00"></td><td id="d_df_an_av" class="analysis">-</td><td id="d_df_ah" class="analysis">-</td></tr>
+                <tr class="account-group linha-calculada-dre"><td class="label">(=) Res. Antes IRPJ/CSLL (LAIR)</td><td id="d_lair_at" class="output">0,00</td><td id="d_lair_at_av" class="analysis">-</td><td id="d_lair_an" class="output">0,00</td><td id="d_lair_an_av" class="analysis">-</td><td id="d_lair_ah" class="analysis">-</td></tr>
+                <tr><td class="label">(-) Prov. IRPJ/CSLL (34%)</td><td id="d_irpj_at" class="output">0,00</td><td id="d_irpj_at_av" class="analysis">-</td><td><input type="text" id="input_dre_irpj_csll_anterior" class="data-input" placeholder="0,00"></td><td id="d_irpj_an_av" class="analysis">-</td><td id="d_irpj_ah" class="analysis">-</td></tr>
+                <tr class="total linha-calculada-dre"><td class="label" id="dre_ll_label_text">(=) Lucro Líquido do Exercício</td><td id="d_ll_at" class="output">0,00</td><td id="d_ll_at_av" class="analysis">-</td><td id="d_ll_an" class="output">0,00</td><td id="d_ll_an_av" class="analysis">-</td><td id="d_ll_ah" class="analysis">-</td></tr>
+            `;
+
+            const bpAtivoTbody = document.getElementById("bp_ativo_tbody");
+            bpAtivoTbody.innerHTML = `
+                <tr class="account-group"><td class="label" colspan="4">ATIVO CIRCULANTE</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Caixa</td><td><input type="text" id="input_bp_caixa_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_caixa_anterior" class="data-input" placeholder="0,00"></td><td id="b_caixa_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Bancos</td><td><input type="text" id="input_bp_banco_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_banco_anterior" class="data-input" placeholder="0,00"></td><td id="b_banco_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Aplic. Fin. (CP)</td><td><input type="text" id="input_bp_appfin_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_appfin_anterior" class="data-input" placeholder="0,00"></td><td id="b_appfin_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Clientes</td><td><input type="text" id="input_bp_clientes_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_clientes_anterior" class="data-input" placeholder="0,00"></td><td id="b_cli_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Adiantamentos</td><td><input type="text" id="input_bp_adiant_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_adiant_anterior" class="data-input" placeholder="0,00"></td><td id="b_adiant_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">Total Ativo Circulante</td><td id="b_ac_at" class="output">0,00</td><td id="b_ac_an" class="output">0,00</td><td id="b_ac_ah" class="analysis">-</td></tr>
+                <tr class="account-group"><td class="label" colspan="4">ATIVO NÃO CIRCULANTE</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Imobilizado</td><td><input type="text" id="input_bp_imob_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_imob_anterior" class="data-input" placeholder="0,00"></td><td id="b_imob_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;(-) Deprec. Acum.</td><td><input type="text" id="input_bp_depac_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_depac_anterior" class="data-input" placeholder="0,00"></td><td id="b_depac_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">Total Ativo Não Circulante</td><td id="b_anc_at" class="output">0,00</td><td id="b_anc_an" class="output">0,00</td><td id="b_anc_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">TOTAL ATIVO</td><td id="b_totativo_at" class="output">0,00</td><td id="b_totativo_an" class="output">0,00</td><td id="b_totativo_ah" class="analysis">-</td></tr>
+            `;
+
+            const bpPassivoPlTbody = document.getElementById("bp_passivopl_tbody");
+            let passivoHtml = `
+                <tr class="account-group"><td class="label" colspan="4">PASSIVO CIRCULANTE</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Fornecedores</td><td><input type="text" id="input_bp_forn_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_forn_anterior" class="data-input" placeholder="0,00"></td><td id="b_forn_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Obrig. Trab.</td><td><input type="text" id="input_bp_obrigtrab_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_obrigtrab_anterior" class="data-input" placeholder="0,00"></td><td id="b_obrigtrab_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Outras Obrig.</td><td><input type="text" id="input_bp_outrobrig_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_outrobrig_anterior" class="data-input" placeholder="0,00"></td><td id="b_outrobrig_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">Total Passivo Circulante</td><td id="b_pc_at" class="output">0,00</td><td id="b_pc_an" class="output">0,00</td><td id="b_pc_ah" class="analysis">-</td></tr>
+                <tr><td colspan="4" style="height: 40px; padding: 0; border-left:none; border-right:none; border-top: 1px solid #ececec; border-bottom:1px solid #ececec;">&nbsp;</td></tr>
+                <tr class="account-group"><td class="label" colspan="4">PATRIMÔNIO LÍQUIDO</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Capital Social</td><td><input type="text" id="input_bp_capsoc_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_capsoc_anterior" class="data-input" placeholder="0,00"></td><td id="b_capsoc_ah" class="analysis">-</td></tr>
+                <tr><td class="label">&nbsp;&nbsp;Lucros Acum.</td><td><input type="text" id="input_bp_lucrosac_atual" class="data-input" placeholder="0,00"></td><td><input type="text" id="input_bp_lucrosac_anterior" class="data-input" placeholder="0,00"></td><td id="b_lucrosac_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">Total Patrimônio Líquido</td><td id="b_pl_at" class="output">0,00</td><td id="b_pl_an" class="output">0,00</td><td id="b_pl_ah" class="analysis">-</td></tr>
+                <tr class="total linha-total-bp"><td class="label">TOTAL PASSIVO E P.L.</td><td id="b_totpassivopl_at" class="output">0,00</td><td id="b_totpassivopl_an" class="output">0,00</td><td id="b_totpassivopl_ah" class="analysis">-</td></tr>
+            `;
+            bpPassivoPlTbody.innerHTML = passivoHtml;
+
+
+            const indTableBody = document.getElementById("indicadores_tbody");
+            // Estrutura da tabela de indicadores com nova coluna e categorias
+            indTableBody.innerHTML = `
+                <tr class="indicator-category-header"><td colspan="5">Indicadores de Liquidez</td></tr>
+                <tr><td>Liquidez Corrente</td><td id="ind_lc_at" class="output">-</td><td id="ind_lc_an" class="output">-</td><td>AC / PC</td><td id="ind_lc_analise" class="analysis-text">-</td></tr>
+                <tr><td>Liquidez Imediata</td><td id="ind_li_at" class="output">-</td><td id="ind_li_an" class="output">-</td><td>(Caixa+Bancos) / PC</td><td id="ind_li_analise" class="analysis-text">-</td></tr>
+
+                <tr class="indicator-category-header"><td colspan="5">Indicadores de Endividamento</td></tr>
+                <tr><td>Endividamento Geral (PC/AT)</td><td id="ind_eg_at" class="analysis">-</td><td id="ind_eg_an" class="analysis">-</td><td>PC / AT</td><td id="ind_eg_analise" class="analysis-text">-</td></tr>
+                <tr><td>Part. Cap. Terceiros / PL</td><td id="ind_pctpl_at" class="analysis">-</td><td id="ind_pctpl_an" class="analysis">-</td><td>PC / PL</td><td id="ind_pctpl_analise" class="analysis-text">-</td></tr>
+
+                <tr class="indicator-category-header"><td colspan="5">Indicadores de Rentabilidade</td></tr>
+                <tr><td>Margem Bruta</td><td id="ind_mb_at" class="analysis">-</td><td id="ind_mb_an" class="analysis">-</td><td>Lucro Bruto / ROL</td><td id="ind_mb_analise" class="analysis-text">-</td></tr>
+                <tr><td>Margem Operacional</td><td id="ind_mo_at" class="analysis">-</td><td id="ind_mo_an" class="analysis">-</td><td>Res. Operac. / ROL</td><td id="ind_mo_analise" class="analysis-text">-</td></tr>
+                <tr><td>Margem Líquida</td><td id="ind_ml_at" class="analysis">-</td><td id="ind_ml_an" class="analysis">-</td><td>Lucro Líquido / ROL</td><td id="ind_ml_analise" class="analysis-text">-</td></tr>
+                <tr><td>ROA (Retorno s/ Ativo)</td><td id="ind_roa_at" class="analysis">-</td><td id="ind_roa_an" class="analysis">-</td><td>LL / Ativo Total</td><td id="ind_roa_analise" class="analysis-text">-</td></tr>
+                <tr><td>ROE (Retorno s/ PL)</td><td id="ind_roe_at" class="analysis">-</td><td id="ind_roe_an" class="analysis">-</td><td>LL / PL Total</td><td id="ind_roe_analise" class="analysis-text">-</td></tr>
+
+                <tr class="indicator-category-header"><td colspan="5">Indicadores de Atividade</td></tr>
+                <tr><td>Giro do Ativo</td><td id="ind_ga_at" class="output">-</td><td id="ind_ga_an" class="output">-</td><td>ROL / Ativo Total</td><td id="ind_ga_analise" class="analysis-text">-</td></tr>
+                <tr><td>PMR (dias)</td><td id="ind_pmr_at" class="output">-</td><td id="ind_pmr_an" class="output">-</td><td>Clientes / (Vendas/360)</td><td id="ind_pmr_analise" class="analysis-text">-</td></tr>
+                <tr><td>PMP (dias)</td><td id="ind_pmp_at" class="output">-</td><td id="ind_pmp_an" class="output">-</td><td>Forn. / (Custos/360)</td><td id="ind_pmp_analise" class="analysis-text">-</td></tr>
+
+                <tr class="indicator-category-header"><td colspan="5">Indicadores Econômicos (Desempenho)</td></tr>
+                <tr><td>Cresc. Receita Líquida</td><td id="ind_crl_at" class="analysis">-</td><td id="ind_crl_an" class="analysis">-</td><td>(ROL Atual-Ant)/Ant</td><td id="ind_crl_analise" class="analysis-text">-</td></tr>
+                <tr><td>Cresc. Lucro Líquido</td><td id="ind_cll_at" class="analysis">-</td><td id="ind_cll_an" class="analysis">-</td><td>(LL Atual-Ant)/Ant</td><td id="ind_cll_analise" class="analysis-text">-</td></tr>
+            `;
+
+            updateTableHeaders();
+
+            document.querySelectorAll('.data-input').forEach(input => {
+                input.addEventListener('input', calcularTudo);
+                input.addEventListener('blur', function(e) {
+                    const value = parseCurrency(e.target.value);
+                    e.target.value = formatCurrency(value);
+                    calcularTudo();
+                });
+                input.addEventListener('focus', function(e) {
+                    const value = parseCurrency(e.target.value);
+                    if (value === 0 && e.target.value.trim() === "0,00") {
+                        e.target.value = "";
+                    } else {
+                        e.target.value = String(e.target.value).replace("R$", "").replace(/\./g, '').trim();
+                    }
+                });
+            });
+
+            document.getElementById('input_ano_atual_label').addEventListener('input', updateTableHeaders);
+            document.getElementById('input_ano_anterior_label').addEventListener('input', updateTableHeaders);
+
+            calcularTudo();
+        }
+
+        // --- Calculation Logic ---
+        function calcularTudo() {
+            const dre = { atual: {}, anterior: {} };
+            const anos = ['atual', 'anterior'];
+
+            anos.forEach(ano => {
+                dre[ano].rs = getVal(`input_dre_rs_${ano}`);
+                dre[ano].rv = getVal(`input_dre_rv_${ano}`);
+                dre[ano].drb = getVal(`input_dre_drb_${ano}`);
+                dre[ano].c = getVal(`input_dre_c_${ano}`);
+                dre[ano].dsal = getVal(`input_dre_dsal_${ano}`);
+                dre[ano].dadm = getVal(`input_dre_dadm_${ano}`);
+                dre[ano].dop = getVal(`input_dre_dop_${ano}`);
+                dre[ano].odop = getVal(`input_dre_odop_${ano}`);
+                dre[ano].rf = getVal(`input_dre_rf_${ano}`);
+                dre[ano].df = getVal(`input_dre_df_${ano}`);
+
+                dre[ano].rob = dre[ano].rs + dre[ano].rv;
+                dre[ano].rol = dre[ano].rob - dre[ano].drb;
+                dre[ano].lb = dre[ano].rol - dre[ano].c;
+                dre[ano].despesas_operacionais_total = dre[ano].dsal + dre[ano].dadm + dre[ano].dop + dre[ano].odop;
+                dre[ano].res_op_antes_fin = dre[ano].lb - dre[ano].despesas_operacionais_total;
+                dre[ano].res_financeiro = dre[ano].rf - dre[ano].df;
+                dre[ano].lair = dre[ano].res_op_antes_fin + dre[ano].res_financeiro;
+                dre[ano].irpj_csll = dre[ano].lair > 0 ? dre[ano].lair * 0.34 : 0;
+                dre[ano].ll = dre[ano].lair - dre[ano].irpj_csll;
+            });
+
+            const llLabelCell = document.getElementById('dre_ll_label_text');
+            if (llLabelCell) {
+                if (dre.atual.ll < 0) {
+                    llLabelCell.textContent = "(=) Prejuízo Líquido do Exercício";
+                } else {
+                    llLabelCell.textContent = "(=) Lucro Líquido do Exercício";
+                }
+            }
+
+
+            const bp = { atual: {}, anterior: {} };
+            anos.forEach(ano => {
+                bp[ano].caixa = getVal(`input_bp_caixa_${ano}`);
+                bp[ano].banco = getVal(`input_bp_banco_${ano}`);
+                bp[ano].appfin = getVal(`input_bp_appfin_${ano}`);
+                bp[ano].clientes = getVal(`input_bp_clientes_${ano}`);
+                bp[ano].adiant = getVal(`input_bp_adiant_${ano}`);
+                bp[ano].imob = getVal(`input_bp_imob_${ano}`);
+                bp[ano].depac = getVal(`input_bp_depac_${ano}`);
+
+                bp[ano].forn = getVal(`input_bp_forn_${ano}`);
+                bp[ano].obrigtrab = getVal(`input_bp_obrigtrab_${ano}`);
+                bp[ano].outrobrig = getVal(`input_bp_outrobrig_${ano}`);
+                bp[ano].capsoc = getVal(`input_bp_capsoc_${ano}`);
+                bp[ano].lucrosac = getVal(`input_bp_lucrosac_${ano}`);
+
+                bp[ano].ativo_circulante = bp[ano].caixa + bp[ano].banco + bp[ano].appfin + bp[ano].clientes + bp[ano].adiant;
+                bp[ano].ativo_nao_circulante = bp[ano].imob - bp[ano].depac;
+                bp[ano].total_ativo = bp[ano].ativo_circulante + bp[ano].ativo_nao_circulante;
+
+                bp[ano].passivo_circulante = bp[ano].forn + bp[ano].obrigtrab + bp[ano].outrobrig;
+                bp[ano].total_passivo = bp[ano].passivo_circulante; // Simplificado, pois não há Passivo Não Circulante
+                bp[ano].patrimonio_liquido = bp[ano].capsoc + bp[ano].lucrosac;
+                bp[ano].total_passivo_pl = bp[ano].total_passivo + bp[ano].patrimonio_liquido;
+            });
+
+            function ah(atual, anterior) {
+                if (Math.abs(anterior) < 0.001 || isNaN(anterior)) return NaN;
+                return ((atual - anterior) / Math.abs(anterior)) * 100;
+            }
+            function av(valor, total) {
+                if (Math.abs(total) < 0.001 || isNaN(total)) return NaN;
+                return (valor / total) * 100;
+            }
+
+            // DRE - AV baseada na ROB
+            setHtmlPercent('d_rs_at_av', av(dre.atual.rs, dre.atual.rob)); setHtmlPercent('d_rs_an_av', av(dre.anterior.rs, dre.anterior.rob)); setHtmlPercent('d_rs_ah', ah(dre.atual.rs, dre.anterior.rs));
+            setHtmlPercent('d_rv_at_av', av(dre.atual.rv, dre.atual.rob)); setHtmlPercent('d_rv_an_av', av(dre.anterior.rv, dre.anterior.rob)); setHtmlPercent('d_rv_ah', ah(dre.atual.rv, dre.anterior.rv));
+            setHtml('d_rob_at', dre.atual.rob); setHtmlPercent('d_rob_at_av', av(dre.atual.rob, dre.atual.rob)); setHtml('d_rob_an', dre.anterior.rob); setHtmlPercent('d_rob_an_av', av(dre.anterior.rob, dre.anterior.rob)); setHtmlPercent('d_rob_ah', ah(dre.atual.rob, dre.anterior.rob));
+            setHtmlPercent('d_drb_at_av', av(dre.atual.drb, dre.atual.rob)); setHtmlPercent('d_drb_an_av', av(dre.anterior.drb, dre.anterior.rob)); setHtmlPercent('d_drb_ah', ah(dre.atual.drb, dre.anterior.drb));
+            setHtml('d_rol_at', dre.atual.rol); setHtmlPercent('d_rol_at_av', av(dre.atual.rol, dre.atual.rob)); setHtml('d_rol_an', dre.anterior.rol); setHtmlPercent('d_rol_an_av', av(dre.anterior.rol, dre.anterior.rob)); setHtmlPercent('d_rol_ah', ah(dre.atual.rol, dre.anterior.rol));
+            setHtmlPercent('d_c_at_av', av(dre.atual.c, dre.atual.rob)); setHtmlPercent('d_c_an_av', av(dre.anterior.c, dre.anterior.rob)); setHtmlPercent('d_c_ah', ah(dre.atual.c, dre.anterior.c));
+            setHtml('d_lb_at', dre.atual.lb); setHtmlPercent('d_lb_at_av', av(dre.atual.lb, dre.atual.rob)); setHtml('d_lb_an', dre.anterior.lb); setHtmlPercent('d_lb_an_av', av(dre.anterior.lb, dre.anterior.rob)); setHtmlPercent('d_lb_ah', ah(dre.atual.lb, dre.anterior.lb));
+            setHtmlPercent('d_dsal_at_av', av(dre.atual.dsal, dre.atual.rob)); setHtmlPercent('d_dsal_an_av', av(dre.anterior.dsal, dre.anterior.rob)); setHtmlPercent('d_dsal_ah', ah(dre.atual.dsal, dre.anterior.dsal));
+            setHtmlPercent('d_dadm_at_av', av(dre.atual.dadm, dre.atual.rob)); setHtmlPercent('d_dadm_an_av', av(dre.anterior.dadm, dre.anterior.rob)); setHtmlPercent('d_dadm_ah', ah(dre.atual.dadm, dre.anterior.dadm));
+            setHtmlPercent('d_dop_at_av', av(dre.atual.dop, dre.atual.rob)); setHtmlPercent('d_dop_an_av', av(dre.anterior.dop, dre.anterior.rob)); setHtmlPercent('d_dop_ah', ah(dre.atual.dop, dre.anterior.dop));
+            setHtmlPercent('d_odop_at_av', av(dre.atual.odop, dre.atual.rob)); setHtmlPercent('d_odop_an_av', av(dre.anterior.odop, dre.anterior.rob)); setHtmlPercent('d_odop_ah', ah(dre.atual.odop, dre.anterior.odop));
+            setHtml('d_resop_at', dre.atual.res_op_antes_fin); setHtmlPercent('d_resop_at_av', av(dre.atual.res_op_antes_fin, dre.atual.rob)); setHtml('d_resop_an', dre.anterior.res_op_antes_fin); setHtmlPercent('d_resop_an_av', av(dre.anterior.res_op_antes_fin, dre.anterior.rob)); setHtmlPercent('d_resop_ah', ah(dre.atual.res_op_antes_fin, dre.anterior.res_op_antes_fin));
+            setHtmlPercent('d_rf_at_av', av(dre.atual.rf, dre.atual.rob)); setHtmlPercent('d_rf_an_av', av(dre.anterior.rf, dre.anterior.rob)); setHtmlPercent('d_rf_ah', ah(dre.atual.rf, dre.anterior.rf));
+            setHtmlPercent('d_df_at_av', av(dre.atual.df, dre.atual.rob)); setHtmlPercent('d_df_an_av', av(dre.anterior.df, dre.anterior.rob)); setHtmlPercent('d_df_ah', ah(dre.atual.df, dre.anterior.df));
+            setHtml('d_lair_at', dre.atual.lair); setHtmlPercent('d_lair_at_av', av(dre.atual.lair, dre.atual.rob)); setHtml('d_lair_an', dre.anterior.lair); setHtmlPercent('d_lair_an_av', av(dre.anterior.lair, dre.anterior.rob)); setHtmlPercent('d_lair_ah', ah(dre.atual.lair, dre.anterior.lair));
+            setHtml('d_irpj_at', dre.atual.irpj_csll); setHtmlPercent('d_irpj_at_av', av(dre.atual.irpj_csll, dre.atual.rob)); setHtml('d_irpj_an', dre.anterior.irpj_csll); setHtmlPercent('d_irpj_an_av', av(dre.anterior.irpj_csll, dre.anterior.rob)); setHtmlPercent('d_irpj_ah', ah(dre.atual.irpj_csll, dre.anterior.irpj_csll));
+            setHtml('d_ll_at', dre.atual.ll); setHtmlPercent('d_ll_at_av', av(dre.atual.ll, dre.atual.rob)); setHtml('d_ll_an', dre.anterior.ll); setHtmlPercent('d_ll_an_av', av(dre.anterior.ll, dre.anterior.rob)); setHtmlPercent('d_ll_ah', ah(dre.atual.ll, dre.anterior.ll));
+
+            // BP - ATIVO (AV removida)
+            setHtmlPercent('b_caixa_ah', ah(bp.atual.caixa, bp.anterior.caixa));
+            setHtmlPercent('b_banco_ah', ah(bp.atual.banco, bp.anterior.banco));
+            setHtmlPercent('b_appfin_ah', ah(bp.atual.appfin, bp.anterior.appfin));
+            setHtmlPercent('b_cli_ah', ah(bp.atual.clientes, bp.anterior.clientes));
+            setHtmlPercent('b_adiant_ah', ah(bp.atual.adiant, bp.anterior.adiant));
+            setHtml('b_ac_at', bp.atual.ativo_circulante); setHtml('b_ac_an', bp.anterior.ativo_circulante); setHtmlPercent('b_ac_ah', ah(bp.atual.ativo_circulante, bp.anterior.ativo_circulante));
+            setHtmlPercent('b_imob_ah', ah(bp.atual.imob, bp.anterior.imob));
+            setHtmlPercent('b_depac_ah', ah(bp.atual.depac, bp.anterior.depac));
+            setHtml('b_anc_at', bp.atual.ativo_nao_circulante); setHtml('b_anc_an', bp.anterior.ativo_nao_circulante); setHtmlPercent('b_anc_ah', ah(bp.atual.ativo_nao_circulante, bp.anterior.ativo_nao_circulante));
+            setHtml('b_totativo_at', bp.atual.total_ativo); setHtml('b_totativo_an', bp.anterior.total_ativo); setHtmlPercent('b_totativo_ah', ah(bp.atual.total_ativo, bp.anterior.total_ativo));
+            // BP - PASSIVO+PL (AV removida)
+            setHtmlPercent('b_forn_ah', ah(bp.atual.forn, bp.anterior.forn));
+            setHtmlPercent('b_obrigtrab_ah', ah(bp.atual.obrigtrab, bp.anterior.obrigtrab));
+            setHtmlPercent('b_outrobrig_ah', ah(bp.atual.outrobrig, bp.anterior.outrobrig));
+            setHtml('b_pc_at', bp.atual.passivo_circulante); setHtml('b_pc_an', bp.anterior.passivo_circulante); setHtmlPercent('b_pc_ah', ah(bp.atual.passivo_circulante, bp.anterior.passivo_circulante));
+            setHtmlPercent('b_capsoc_ah', ah(bp.atual.capsoc, bp.anterior.capsoc));
+            setHtmlPercent('b_lucrosac_ah', ah(bp.atual.lucrosac, bp.anterior.lucrosac));
+            setHtml('b_pl_at', bp.atual.patrimonio_liquido); setHtml('b_pl_an', bp.anterior.patrimonio_liquido); setHtmlPercent('b_pl_ah', ah(bp.atual.patrimonio_liquido, bp.anterior.patrimonio_liquido));
+            setHtml('b_totpassivopl_at', bp.atual.total_passivo_pl); setHtml('b_totpassivopl_an', bp.anterior.total_passivo_pl); setHtmlPercent('b_totpassivopl_ah', ah(bp.atual.total_passivo_pl, bp.anterior.total_passivo_pl));
+
+            // --- Indicadores ---
+            const ind = { atual: {}, anterior: {} };
+            anos.forEach(ano => {
+                // Liquidez
+                ind[ano].liq_corrente = (Math.abs(bp[ano].passivo_circulante) > 0.001) ? bp[ano].ativo_circulante / bp[ano].passivo_circulante : NaN;
+                ind[ano].liq_imediata = (Math.abs(bp[ano].passivo_circulante) > 0.001) ? (bp[ano].caixa + bp[ano].banco) / bp[ano].passivo_circulante : NaN;
+                // Endividamento
+                ind[ano].end_geral = (Math.abs(bp[ano].total_ativo) > 0.001) ? bp[ano].passivo_circulante / bp[ano].total_ativo * 100 : NaN; // PC/AT
+                ind[ano].pct_pl = (Math.abs(bp[ano].patrimonio_liquido) > 0.001) ? bp[ano].passivo_circulante / bp[ano].patrimonio_liquido * 100 : NaN; // PC/PL
+                // Rentabilidade
+                ind[ano].margem_bruta = (Math.abs(dre[ano].rol) > 0.001) ? (dre[ano].lb / dre[ano].rol) * 100 : NaN;
+                ind[ano].margem_op = (Math.abs(dre[ano].rol) > 0.001) ? (dre[ano].res_op_antes_fin / dre[ano].rol) * 100 : NaN;
+                ind[ano].margem_liq = (Math.abs(dre[ano].rol) > 0.001) ? (dre[ano].ll / dre[ano].rol) * 100 : NaN;
+                ind[ano].roa = (Math.abs(bp[ano].total_ativo) > 0.001) ? (dre[ano].ll / bp[ano].total_ativo) * 100 : NaN;
+                ind[ano].roe = (Math.abs(bp[ano].patrimonio_liquido) > 0.001) ? (dre[ano].ll / bp[ano].patrimonio_liquido) * 100 : NaN;
+                // Atividade
+                ind[ano].giro_ativo = (Math.abs(bp[ano].total_ativo) > 0.001) ? dre[ano].rol / bp[ano].total_ativo : NaN;
+                let vendas_totais = dre[ano].rs + dre[ano].rv;
+                ind[ano].pmr = (Math.abs(vendas_totais) > 0.001) ? (bp[ano].clientes / (vendas_totais / 360)) : NaN;
+                ind[ano].pmp = (Math.abs(dre[ano].c) > 0.001) ? (bp[ano].forn / (dre[ano].c / 360)) : NaN;
+                // Econômicos (Desempenho)
+                if (ano === 'atual' && Math.abs(dre.anterior.rol) > 0.001) {
+                    ind.atual.cresc_rol = ((dre.atual.rol - dre.anterior.rol) / dre.anterior.rol) * 100;
+                } else if (ano === 'atual') {
+                    ind.atual.cresc_rol = NaN;
+                }
+                if (ano === 'atual' && Math.abs(dre.anterior.ll) > 0.001) { // Evitar divisão por zero ou LL anterior muito pequeno/negativo para %
+                    ind.atual.cresc_ll = ((dre.atual.ll - dre.anterior.ll) / Math.abs(dre.anterior.ll)) * 100;
+                } else if (ano === 'atual') {
+                    ind.atual.cresc_ll = NaN;
+                }
+            });
+
+            // Populando tabela de indicadores
+            setHtml('ind_lc_at', ind.atual.liq_corrente, true, true, 2);
+            setHtml('ind_lc_an', ind.anterior.liq_corrente, true, true, 2);
+            setAnalysisText('ind_lc_analise', getLiquidezAnalise(ind.atual.liq_corrente, ind.anterior.liq_corrente));
+
+            setHtml('ind_li_at', ind.atual.liq_imediata, true, true, 2);
+            setHtml('ind_li_an', ind.anterior.liq_imediata, true, true, 2);
+            setAnalysisText('ind_li_analise', getLiquidezImediataAnalise(ind.atual.liq_imediata, ind.anterior.liq_imediata));
+
+            setHtmlPercent('ind_eg_at', ind.atual.end_geral); setHtmlPercent('ind_eg_an', ind.anterior.end_geral);
+            setAnalysisText('ind_eg_analise', getEndividamentoGeralAnalise(ind.atual.end_geral, ind.anterior.end_geral));
+            setHtmlPercent('ind_pctpl_at', ind.atual.pct_pl); setHtmlPercent('ind_pctpl_an', ind.anterior.pct_pl);
+            setAnalysisText('ind_pctpl_analise', getPCTPLAnalise(ind.atual.pct_pl, ind.anterior.pct_pl));
+
+            setHtmlPercent('ind_mb_at', ind.atual.margem_bruta); setHtmlPercent('ind_mb_an', ind.anterior.margem_bruta);
+            setAnalysisText('ind_mb_analise', getMargemAnalise(ind.atual.margem_bruta, ind.anterior.margem_bruta, "Margem Bruta"));
+            setHtmlPercent('ind_mo_at', ind.atual.margem_op); setHtmlPercent('ind_mo_an', ind.anterior.margem_op);
+            setAnalysisText('ind_mo_analise', getMargemAnalise(ind.atual.margem_op, ind.anterior.margem_op, "Margem Operacional"));
+            setHtmlPercent('ind_ml_at', ind.atual.margem_liq); setHtmlPercent('ind_ml_an', ind.anterior.margem_liq);
+            setAnalysisText('ind_ml_analise', getMargemAnalise(ind.atual.margem_liq, ind.anterior.margem_liq, "Margem Líquida"));
+            setHtmlPercent('ind_roa_at', ind.atual.roa); setHtmlPercent('ind_roa_an', ind.anterior.roa);
+            setAnalysisText('ind_roa_analise', getRentabilidadeAnalise(ind.atual.roa, ind.anterior.roa, "ROA"));
+            setHtmlPercent('ind_roe_at', ind.atual.roe); setHtmlPercent('ind_roe_an', ind.anterior.roe);
+            setAnalysisText('ind_roe_analise', getRentabilidadeAnalise(ind.atual.roe, ind.anterior.roe, "ROE"));
+
+            setHtml('ind_ga_at', formatCurrency(ind.atual.giro_ativo,2)); setHtml('ind_ga_an', formatCurrency(ind.anterior.giro_ativo,2));
+            setAnalysisText('ind_ga_analise', getGiroAnalise(ind.atual.giro_ativo, ind.anterior.giro_ativo, "Giro do Ativo"));
+            setHtml('ind_pmr_at', formatCurrency(ind.atual.pmr,0)); setHtml('ind_pmr_an', formatCurrency(ind.anterior.pmr,0));
+            setAnalysisText('ind_pmr_analise', getPrazoAnalise(ind.atual.pmr, ind.anterior.pmr, "PMR", false)); // Menor é melhor para PMR
+            setHtml('ind_pmp_at', formatCurrency(ind.atual.pmp,0)); setHtml('ind_pmp_an', formatCurrency(ind.anterior.pmp,0));
+            setAnalysisText('ind_pmp_analise', getPrazoAnalise(ind.atual.pmp, ind.anterior.pmp, "PMP", true)); // Maior é melhor para PMP
+
+            setHtmlPercent('ind_crl_at', ind.atual.cresc_rol); setHtml('ind_crl_an', '-', false); // CRL é só para o ano atual comparado ao anterior
+            setAnalysisText('ind_crl_analise', getCrescimentoAnalise(ind.atual.cresc_rol, "Crescimento da Receita Líquida"));
+            setHtmlPercent('ind_cll_at', ind.atual.cresc_ll); setHtml('ind_cll_an', '-', false); // TCLL é só para o ano atual comparado ao anterior
+            setAnalysisText('ind_cll_analise', getCrescimentoAnalise(ind.atual.cresc_ll, "Crescimento do Lucro Líquido"));
+
+
+            const diffBPAtual = bp.atual.total_ativo - bp.atual.total_passivo_pl;
+            const totalAtivoCellAtual = document.getElementById('b_totativo_at');
+            const totalPassivoPLCellAtual = document.getElementById('b_totpassivopl_at');
+            [totalAtivoCellAtual, totalPassivoPLCellAtual].forEach(cell => {
+                if (Math.abs(diffBPAtual) > 0.015) {
+                    cell.style.backgroundColor = '#ffdddd'; cell.title = `Diferença BP Atual: ${formatCurrency(diffBPAtual)}`;
+                } else {
+                    cell.style.backgroundColor = ''; cell.title = '';
+                    if(cell.closest('tr') && cell.closest('tr').classList.contains('linha-total-bp')) {
+                        cell.style.backgroundColor = '#e6f3ff';
+                    } else if (cell.closest('tr') && cell.closest('tr').classList.contains('total')) {
+                        cell.style.backgroundColor = '#e8e8e8';
+                    }
+                }
+            });
+            const diffBPAnterior = bp.anterior.total_ativo - bp.anterior.total_passivo_pl;
+            const totalAtivoCellAnterior = document.getElementById('b_totativo_an');
+            const totalPassivoPLCellAnterior = document.getElementById('b_totpassivopl_an');
+            [totalAtivoCellAnterior, totalPassivoPLCellAnterior].forEach(cell => {
+                if (Math.abs(diffBPAnterior) > 0.015) {
+                    cell.style.backgroundColor = '#ffdddd'; cell.title = `Diferença BP Anterior: ${formatCurrency(diffBPAnterior)}`;
+                } else {
+                    cell.style.backgroundColor = ''; cell.title = '';
+                    if(cell.closest('tr') && cell.closest('tr').classList.contains('linha-total-bp')) {
+                        cell.style.backgroundColor = '#e6f3ff';
+                    } else if (cell.closest('tr') && cell.closest('tr').classList.contains('total')) {
+                        cell.style.backgroundColor = '#e8e8e8';
+                    }
+                }
+            });
+        }
+
+        // --- Funções de Análise de Indicadores ---
+        function getLiquidezAnalise(atual, anterior) {
+            let analiseText = "";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: "Dados insuficientes.", sentiment: "neutral" };
+
+            // Lógica para determinar o sentimento do INDICADOR DE LIQUIDEZ CORRENTE
+            // Geralmente, maior que 1 é bom. Maior que 1.5 excelente. Abaixo de 1 preocupante.
+            if (atual > 1.5) {
+                analiseText = "Boa capacidade de pagamento a curto prazo. ";
+                sentiment = "positive";
+            } else if (atual >= 1) {
+                analiseText = "Capacidade de pagamento a curto prazo equilibrada. ";
+                sentiment = "neutral";
+            } else {
+                analiseText = "Baixa capacidade de pagamento a curto prazo. Requer atenção. ";
+                sentiment = "negative";
+            }
+
+            // Comparação com ano anterior
+            if (!isNaN(anterior)) {
+                if (atual > anterior) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    // Se já era positivo, continua. Se era neutro/negativo e melhorou, pode virar neutro/positivo
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual < anterior) {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    // Se era positivo/neutro e piorou, pode virar neutro/negativo
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Manteve-se estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+        function getLiquidezImediataAnalise(atual, anterior){
+            let analiseText = "";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: "Dados insuficientes.", sentiment: "neutral" };
+
+            if (atual >= 0.5) {
+                analiseText = "Alta capacidade de pagamento imediato. ";
+                sentiment = "positive";
+            } else if (atual >= 0.2) {
+                analiseText = "Capacidade de pagamento imediato razoável. ";
+                sentiment = "neutral";
+            } else {
+                analiseText = "Baixa capacidade de pagamento imediato. ";
+                sentiment = "negative";
+            }
+
+            if (!isNaN(anterior)) {
+                if (atual > anterior) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual < anterior) {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Manteve-se estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+        function getEndividamentoGeralAnalise(atual, anterior) {
+            let analiseText = "";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: "Dados insuficientes.", sentiment: "neutral" };
+
+            // Endividamento Geral (PC/AT): Quanto MENOR, MELHOR
+            if (atual < 40) {
+                analiseText = "Baixo endividamento (PC/AT). ";
+                sentiment = "positive";
+            } else if (atual <= 60) {
+                analiseText = "Endividamento moderado (PC/AT). ";
+                sentiment = "neutral";
+            } else {
+                analiseText = "Alto endividamento (PC/AT), requer análise da qualidade da dívida. ";
+                sentiment = "negative";
+            }
+
+            if(!isNaN(anterior)){
+                if(atual < anterior) {
+                    analiseText += "Reduziu o endividamento.";
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual > anterior) {
+                    analiseText += "Aumentou o endividamento.";
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Endividamento estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+        function getPCTPLAnalise(atual, anterior) {
+            let analiseText = "";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: "Dados insuficientes.", sentiment: "neutral" };
+            // PCTPL: Quanto MENOR, MELHOR
+            if (atual < 80) {
+                analiseText = "Baixa dependência de capital de terceiros (PC/PL). ";
+                sentiment = "positive";
+            } else if (atual <= 120) {
+                analiseText = "Dependência moderada de capital de terceiros (PC/PL). ";
+                sentiment = "neutral";
+            } else {
+                analiseText = "Alta dependência de capital de terceiros (PC/PL). ";
+                sentiment = "negative";
+            }
+
+            if(!isNaN(anterior)){
+                if(atual < anterior) {
+                    analiseText += "Reduziu a alavancagem.";
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual > anterior) {
+                    analiseText += "Aumentou a alavancagem.";
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Alavancagem estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+
+        function getMargemAnalise(atual, anterior, nomeMargem) {
+            let analiseText = nomeMargem + ": ";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: analiseText + "Dados insuficientes.", sentiment: "neutral" };
+
+            // Margens: Quanto MAIOR, MELHOR
+            if (atual > 15) {
+                analiseText += "Excelente. ";
+                sentiment = "positive";
+            } else if (atual > 5) {
+                analiseText += "Boa. ";
+                sentiment = "neutral";
+            } else if (atual > 0) {
+                analiseText += "Baixa. ";
+                sentiment = "negative";
+            } else {
+                analiseText += "Negativa (Prejuízo). ";
+                sentiment = "negative";
+            }
+
+            if (!isNaN(anterior)) {
+                if (atual > anterior) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual < anterior) {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Manteve-se estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+        function getRentabilidadeAnalise(atual, anterior, nomeRentabilidade) {
+            let analiseText = nomeRentabilidade + ": ";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: analiseText + "Dados insuficientes.", sentiment: "neutral" };
+
+            // Rentabilidade (ROA, ROE): Quanto MAIOR, MELHOR
+            if (atual > 20) {
+                analiseText += "Alto retorno. ";
+                sentiment = "positive";
+            } else if (atual > 10) {
+                analiseText += "Bom retorno. ";
+                sentiment = "neutral";
+            } else if (atual > 0) {
+                analiseText += "Baixo retorno. ";
+                sentiment = "negative";
+            } else {
+                analiseText += "Retorno negativo. ";
+                sentiment = "negative";
+            }
+
+
+            if (!isNaN(anterior)) {
+                if (atual > anterior) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "negative") sentiment = "positive";
+                } else if (atual < anterior) {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    if (sentiment === "neutral" || sentiment === "positive") sentiment = "negative";
+                } else {
+                    analiseText += "Manteve-se estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+        function getGiroAnalise(atual, anterior, nomeGiro){
+            let analiseText = nomeGiro + ": ";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: analiseText + "Dados insuficientes.", sentiment: "neutral" };
+            analiseText += `Giro de ${formatCurrency(atual, 2)}. Quanto maior, melhor a eficiência. `;
+
+            // Giro do Ativo: Quanto MAIOR, MELHOR
+            if (!isNaN(anterior)) {
+                if (atual > anterior) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    sentiment = "positive";
+                } else if (atual < anterior) {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    sentiment = "negative";
+                } else {
+                    analiseText += "Manteve-se estável.";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+        function getPrazoAnalise(atual, anterior, nomePrazo, maiorMelhor = false) {
+            let analiseText = nomePrazo + ": ";
+            let sentiment = "neutral";
+
+            if (isNaN(atual)) return { text: analiseText + "Dados insuficientes.", sentiment: "neutral" };
+            analiseText += `${formatCurrency(atual, 0)} dias. `;
+
+            if (!isNaN(anterior)) {
+                let melhorou;
+                if (maiorMelhor) melhorou = atual > anterior; // PMP: maior é melhor
+                else melhorou = atual < anterior; // PMR: menor é melhor
+
+                if (atual === anterior) {
+                    analiseText += "Manteve-se estável.";
+                } else if (melhorou) {
+                    analiseText += "Melhorou em relação ao ano anterior.";
+                    sentiment = "positive";
+                } else {
+                    analiseText += "Piorou em relação ao ano anterior.";
+                    sentiment = "negative";
+                }
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+        function getCrescimentoAnalise(taxa, nomeTaxa) {
+            let analiseText = nomeTaxa + ": ";
+            let sentiment = "neutral";
+
+            if (isNaN(taxa)) return { text: analiseText + "Dados insuficientes ou não aplicável.", sentiment: "neutral" };
+
+            // Crescimento: Quanto MAIOR, MELHOR
+            if (taxa > 10) {
+                analiseText += "Forte crescimento. ";
+                sentiment = "positive";
+            } else if (taxa > 0) {
+                analiseText += "Crescimento modesto. ";
+                sentiment = "neutral";
+            } else if (taxa === 0) {
+                analiseText += "Estável. ";
+            } else {
+                analiseText += "Decréscimo. ";
+                sentiment = "negative";
+            }
+            return { text: analiseText, sentiment: sentiment };
+        }
+
+        document.addEventListener('DOMContentLoaded', construirTabelasComInputs);
+
+    </script>
+</body>
+</html>
